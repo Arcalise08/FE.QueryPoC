@@ -22,15 +22,14 @@ public class Tests :
     [InlineData("?id=1&Paging.maxItemsPerCall={0}&Paging.continuationToken={1}")]
     [InlineData("?id=1&paging.maxItemsPerCall={0}&paging.continuationToken={1}")]
     [InlineData("?id=1&paging.MaxItemsPerCall={0}&paging.ContinuationToken={1}")]
-    public async Task GeneralIntegration(string queryStringRaw)
+    public async Task GeneralIntegration(string queryStringFormat)
     {
         var client = TestFactory.CreateClient();
         var expectedMaxItems = Fixture.Create<int>();
         var expectedToken = Fixture.Create<string>();
-        var queryString = string.Format(queryStringRaw, expectedMaxItems, expectedToken); 
+        var queryString = string.Format(queryStringFormat, expectedMaxItems, expectedToken); 
         var response = await client.GetAsync($"/foos{queryString}");
-        var stringResponse = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<GetFoosByBarQuery>(stringResponse);
+        var result = JsonSerializer.Deserialize<GetFoosByBarQuery>(await response.Content.ReadAsStringAsync());
         Assert.NotNull(result);
         Assert.NotNull(result.Paging);
         Assert.Equal(expectedMaxItems, result.Paging.MaxItemsPerCall);
